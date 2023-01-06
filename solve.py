@@ -1,35 +1,24 @@
-solution = [[9, 5, 3, 1, 6, 7, 4, 2, 8],
-            [4, 2, 8, 3, 5, 9, 7, 6, 1],
-            [7, 6, 1, 8, 2, 4, 9, 5, 3],
-            [5, 8, 4, 9, 3, 6, 2, 1, 7],
-            [6, 3, 9, 7, 1, 2, 5, 8, 4],
-            [2, 1, 7, 4, 8, 5, 6, 3, 9],
-            [3, 4, 5, 6, 9, 1, 8, 7, 2],
-            [8, 7, 2, 5, 4, 3, 1, 9, 6],
-            [1, 9, 6, 2, 7, 8, 3, 4, 5]]
+import copy 
 
-board = [[0, 0, 0, 0, 0, 0, 0, 0, 8],
-         [0, 2, 0, 0, 5, 0, 7, 6, 0],
-         [0, 6, 0, 0, 0, 0, 0, 0, 3],
-         [5, 0, 0, 0, 0, 0, 2, 0, 7],
-         [0, 3, 0, 0, 1, 0, 0, 0, 0],
-         [2, 0, 0, 4, 0, 0, 0, 3, 0],
-         [0, 0, 0, 6, 0, 0, 0, 0, 0],
-         [8, 0, 0, 0, 0, 0, 0, 0, 0],
-         [1, 0, 0, 2, 7, 0, 0, 4, 0]]
+# starting_board = [[0, 0, 0, 0, 0, 0, 0, 0, 8],
+#                   [0, 2, 0, 0, 5, 0, 7, 6, 0],
+#                   [0, 6, 0, 0, 0, 0, 0, 0, 3],
+#                   [5, 0, 0, 0, 0, 0, 2, 0, 7],
+#                   [0, 3, 0, 0, 1, 0, 0, 0, 0],
+#                   [2, 0, 0, 4, 0, 0, 0, 3, 0],
+#                   [0, 0, 0, 6, 0, 0, 0, 0, 0],
+#                   [8, 0, 0, 0, 0, 0, 0, 0, 0],
+#                   [1, 0, 0, 2, 7, 0, 0, 4, 0]]
 
-nums = set({})
-
-
-def solve(board):
-    """Solves a sudoku board"""
-    pass
-
-
-def check_square(board, row, column):
-    """Checks if a sudoku board square is valid"""
-    return check_row(board, row) and check_column(board, column) and check_square(board, row, column)
-
+starting_board = [[0,0,6,0,4,0,0,9,7],
+                    [0,4,0,7,3,0,0,1,0],
+                    [0,1,7,0,9,2,0,3,0],
+                    [6,0,0,0,7,0,0,8,0],
+                    [1,0,5,0,6,0,9,0,3],
+                    [0,2,0,0,1,0,0,0,6],
+                    [0,5,0,9,8,0,1,6,0],
+                    [0,9,0,0,5,6,0,7,0],
+                    [8,6,0,0,2,0,3,0,0]]
 
 def check_board(board):
     """Checks if a sudoku board state is valid"""
@@ -46,7 +35,7 @@ def check_rows(board):
 
 def check_row(board, row):
     """Checks if a sudoku board row is valid"""
-    nums.clear()
+    nums = set({})
     for i in range(9):
         cur = board[row][i]
         if cur == 0:
@@ -68,7 +57,7 @@ def check_columns(board):
 
 def check_column(board, column):
     """Checks if a sudoku board column is valid"""
-    nums.clear()
+    nums = set({})
     for i in range(9):
         cur = board[i][column]
         if cur == 0:
@@ -91,7 +80,7 @@ def check_squares(board):
 
 def check_square(board, row, column):
     """Checks if a sudoku board square is valid"""
-    nums.clear()
+    nums = set({})
     row = row - row % 3
     column = column - column % 3
     for i in range(3):
@@ -105,7 +94,86 @@ def check_square(board, row, column):
                 nums.add(board[row + i][column + j])
     return True
 
+def solve(board):
+    """Solves a sudoku board"""
+    pass
+
+def get_possible_nums(board, row, column):
+    """Gets the possible numbers for a tile"""
+    valid = []
+    for num in range(1,10):
+        flag = 1
+
+        # check row
+        for i in range(9):
+            if (board[i][column]) == num:
+                flag = 0
+                break
+
+        # check column
+        for i in range(9):
+            if (board[row][i]) == num:
+                flag = 0
+                break
+
+        # check square
+        base_row = row - row % 3
+        base_column = column - column % 3
+        for i in range(3):
+            for j in range(3):
+                if (board[base_row + i][base_column + j]) == num:
+                    flag = 0
+                    break
+
+        # add to list
+        if flag:
+            valid.append(num)
+
+    return valid
+
+def backtrack():
+    """Backtracks a sudoku board aka the lil bit inefficient way"""
+    
+    working = copy.deepcopy(starting_board)
+    i = 0
+    j = 0
+    forward = True
+    
+    while i < 9 and j < 9:
+        print(i, j)
+        if (i<0 or j<0):
+            break
+        if starting_board[i][j] == 0: # if the tile is editable
+            cur = working[i][j]
+            nums = [n for n in get_possible_nums(working, i, j) if n > cur]
+            if len(nums) == 0: # something went wrong, so backtrack
+                forward = False
+                working[i][j] = 0
+            else:
+                working[i][j] = nums[0]
+                forward = True
+        if forward:
+            if j == 8:
+                i += 1
+                j = 0
+            else:
+                j += 1
+        else:
+            if j == 0:
+                i -= 1
+                j = 8
+            else:
+                j -= 1
+    return working
+    
+def print_board(board):
+    """Prints a board"""
+    for i in range(9):
+        for j in range(9):
+            print(board[i][j], end=" ")
+        print()
+    print("---------------------")
 
 if __name__ == "__main__":
-    print(check(board))
-    print(check(solution))
+    solution = backtrack()
+    print_board(solution)
