@@ -1,6 +1,6 @@
 import pygame
 import time
-import solve 
+from solve import backtrack 
 
 
 pygame.font.init()
@@ -81,6 +81,7 @@ def grid_write(x, y, val):
 
 def display_error_message():
     pygame.draw.rect(Window,(155,100,100),[error_x,error_y,error_width,error_height])
+    Window.blit(error_text, (error_x + 5, error_y + 5))
 
 
 while(True):
@@ -122,9 +123,10 @@ while(True):
             elif solve_button_x <= mouse[0] <= solve_button_x + solve_button_width and solve_button_y <= mouse[1] <= solve_button_y + solve_button_height:
                 print("pressed solve")
                 try: 
-                    defaultgrid = solve(defaultgrid)
+                    defaultgrid = backtrack(defaultgrid)
                     error_flag = 0
                 except:
+                    print("error_flag")
                     error_flag = 1
             
     Window.fill((255,255,255))
@@ -146,7 +148,9 @@ while(True):
     Window.blit(solve_button_text, (solve_button_x + 5, solve_button_y + 5))
 
     if error_flag:
-        display_error_message()
+        pygame.draw.rect(Window,(155,100,100),[error_x,error_y,error_width,error_height])
+        Window.blit(error_text, (error_x + 5, error_y + 5))
+    
     pygame.display.update()
     if flag:
         pygame.quit()
